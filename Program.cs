@@ -17,6 +17,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+//BOOKS
 app.MapGet("api/v1/books/list", () =>
 {
     using var db = new LibraryDB();
@@ -29,7 +30,7 @@ app.MapPost("api/v1/books/create", (Book book) =>
     db.SaveChanges();
     return "book created!!!";
 });
-app.MapPut("api/v1/books/update/{id}", (int id,Book book) =>
+app.MapPut("api/v1/books/update/{id}", (int id, Book book) =>
 {
     using var db = new LibraryDB();
     var b = db.Books.Find(id);
@@ -51,14 +52,56 @@ app.MapDelete("api/v1/books/remove/{id}", (int id) =>
     var book = db.Books.Find(id);
     if (book == null)
     {
-          return "book dose not exist .";
+        return "book dose not exist .";
     }
     db.Books.Remove(book);
     db.SaveChanges();
-
     return "book removed";
 }
 );
+//MEMBERS
+
+app.MapGet("api/v1/member/list", () =>
+{
+    using var db = new LibraryDB();
+    return db.Members.ToList();
+});
+app.MapPost("api/v1/member/create", (Member member) =>
+{
+    using var db = new LibraryDB();
+    db.Members.Add(member);
+    db.SaveChanges();
+    return "book created!!!";
+});
+app.MapPut("api/v1/member/update/{id}", (int id, Member member) =>
+{
+    using var db = new LibraryDB();
+    var m = db.Members.Find(id);
+    if (m == null)
+    {
+        return "this member dose not exist .";
+    }
+    m.Firstname = member.Firstname;
+    m.Lastname = member.Lastname;
+    m.Gender = member.Gender;
+    db.SaveChanges();
+    return "book updated";
+}
+);
+app.MapDelete("api/v1/member/remove/{id}", (int id) =>
+{
+    using var db = new LibraryDB();
+    var member = db.Members.Find(id);
+    if (member == null)
+    {
+        return " member dose not exist .";
+    }
+    db.Members.Remove(member);
+    db.SaveChanges();
+    return "member removed";
+}
+);
+
 
 
 
