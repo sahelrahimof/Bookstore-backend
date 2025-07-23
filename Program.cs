@@ -1,5 +1,7 @@
 using System.Data.Common;
 using backend.DbContextes;
+using backend.DTOs.Books;
+using backend.DTOs.Commen;
 using backend.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,34 +22,56 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 //BOOKS
+
 app.MapGet("api/v1/books/list", ([FromServices] LibraryDB db) =>
 {
     return db.Books.ToList();
 });
+
+
 app.MapPost("api/v1/books/create",
 ([FromServices] LibraryDB db,
-[FromBody] Book book) =>
+[FromBody] BookAddDto bookAddDto) =>
 {
+    var book = new Book
+    {
+        Titel = !string.IsNullOrEmpty(bookAddDto.Titel.Trim()) ? bookAddDto.Titel : "no title",
+        Writer = bookAddDto.Writer,
+        Publisher = bookAddDto.Publisher,
+        Price = bookAddDto.Price
+    };
     db.Books.Add(book);
     db.SaveChanges();
-    return new { message = "book created!!!"};
+    return new CommandResultDto
+    {
+        Succesfull = true,
+        Message = "book created!!!"
+    };
 });
+
+
 app.MapPut("api/v1/books/update/{id}",
 ([FromServices] LibraryDB db,
 [FromRoute] int id,
-[FromBody] Book book) =>
+[FromBody] BookUpdateDto bookUpdateDto) =>
 {
     var b = db.Books.Find(id);
     if (b == null)
     {
-        return new { message = "book dose not exist ." };
+        return new CommandResultDto{
+            Succesfull = false,
+            Message = "Not Found!"};
     }
-    b.Titel = book.Titel;
-    b.Price = book.Price;
-    b.Publisher = book.Publisher;
-    b.Writer = book.Writer;
+    b.Titel = !string.IsNullOrEmpty(bookUpdateDto.Titel) ? bookUpdateDto.Titel : "no title";
+    b.Price = bookUpdateDto.Price;
+    b.Publisher = bookUpdateDto.Publisher;
+    b.Writer = bookUpdateDto.Writer;
     db.SaveChanges();
-    return new { message = "book updated" };
+    return  new CommandResultDto
+    {
+        Succesfull = false,
+        Message = "book updated"
+    } ;
 }
 );
 
@@ -58,13 +82,17 @@ app.MapDelete("api/v1/books/remove/{id}",
     var book = db.Books.Find(id);
     if (book == null)
     {
-        return new { message = "book dose not exist ." };
+        return new { Message = "book dose not exist ." };
     }
     db.Books.Remove(book);
     db.SaveChanges();
-    return new { message = "book removed" };
+    return new { Message = "book removed" };
 }
 );
+
+
+
+
 //MEMBERS
 
 app.MapGet("api/v1/member/list", ([FromServices] LibraryDB db) =>
@@ -78,6 +106,9 @@ app.MapPost("api/v1/member/create", ([FromServices] LibraryDB db,
     db.SaveChanges();
     return new { message = "book created!!!" };
 });
+
+
+
 app.MapPut("api/v1/member/update/{id}",
 ([FromServices] LibraryDB db,
 [FromRoute] int id,
@@ -95,6 +126,8 @@ app.MapPut("api/v1/member/update/{id}",
     return "book updated";
 }
 );
+
+
 app.MapDelete("api/v1/member/remove/{id}",
 ([FromServices] LibraryDB db,
 [FromRoute] int id) =>
