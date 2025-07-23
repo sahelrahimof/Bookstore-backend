@@ -11,5 +11,6 @@ namespace backend.DTOs.Books
         public string? Writer { get; set; }
         public string? Publisher { get; set; }
         public double Price { get; set; }
+        
     }
 }

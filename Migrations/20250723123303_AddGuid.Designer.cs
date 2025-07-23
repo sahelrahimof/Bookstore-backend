@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using backend.DbContextes;
 
@@ -10,9 +11,11 @@ using backend.DbContextes;
 namespace backend.Migrations
 {
     [DbContext(typeof(LibraryDB))]
-    partial class LibraryDBModelSnapshot : ModelSnapshot
+    [Migration("20250723123303_AddGuid")]
+    partial class AddGuid
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.7");

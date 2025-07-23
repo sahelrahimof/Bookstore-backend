@@ -18,5 +18,10 @@ public DbSet<Member> Members{ get; set; }
            // base.OnConfiguring(optionsBuilder);
             optionsBuilder.UseSqlite(@"Data source=DBFiles\librarydb.sqlite");
         }
+
+        internal object MembersFirstOrDefault(Func<object, bool> value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
