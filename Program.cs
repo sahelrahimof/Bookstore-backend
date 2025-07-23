@@ -1,11 +1,13 @@
 using System.Data.Common;
 using backend.DbContextes;
 using backend.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddOpenApi();
+builder.Services.AddDbContext<LibraryDB>();
 
 var app = builder.Build();
 
@@ -18,64 +20,69 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 //BOOKS
-app.MapGet("api/v1/books/list", () =>
+app.MapGet("api/v1/books/list", ([FromServices] LibraryDB db) =>
 {
-    using var db = new LibraryDB();
     return db.Books.ToList();
 });
-app.MapPost("api/v1/books/create", (Book book) =>
+app.MapPost("api/v1/books/create",
+([FromServices] LibraryDB db,
+[FromBody] Book book) =>
 {
-    using var db = new LibraryDB();
     db.Books.Add(book);
     db.SaveChanges();
-    return "book created!!!";
+    return new { message = "book created!!!"};
 });
-app.MapPut("api/v1/books/update/{id}", (int id, Book book) =>
+app.MapPut("api/v1/books/update/{id}",
+([FromServices] LibraryDB db,
+[FromRoute] int id,
+[FromBody] Book book) =>
 {
-    using var db = new LibraryDB();
     var b = db.Books.Find(id);
     if (b == null)
     {
-        return "book dose not exist .";
+        return new { message = "book dose not exist ." };
     }
     b.Titel = book.Titel;
     b.Price = book.Price;
     b.Publisher = book.Publisher;
     b.Writer = book.Writer;
     db.SaveChanges();
-    return "book updated";
+    return new { message = "book updated" };
 }
 );
-app.MapDelete("api/v1/books/remove/{id}", (int id) =>
+
+app.MapDelete("api/v1/books/remove/{id}",
+([FromServices] LibraryDB db,
+[FromRoute] int id) =>
 {
-    using var db = new LibraryDB();
     var book = db.Books.Find(id);
     if (book == null)
     {
-        return "book dose not exist .";
+        return new { message = "book dose not exist ." };
     }
     db.Books.Remove(book);
     db.SaveChanges();
-    return "book removed";
+    return new { message = "book removed" };
 }
 );
 //MEMBERS
 
-app.MapGet("api/v1/member/list", () =>
+app.MapGet("api/v1/member/list", ([FromServices] LibraryDB db) =>
 {
-    using var db = new LibraryDB();
     return db.Members.ToList();
 });
-app.MapPost("api/v1/member/create", (Member member) =>
+app.MapPost("api/v1/member/create", ([FromServices] LibraryDB db,
+[FromBody] Member member) =>
 {
-    using var db = new LibraryDB();
     db.Members.Add(member);
     db.SaveChanges();
-    return "book created!!!";
+    return new { message = "book created!!!" };
 });
-app.MapPut("api/v1/member/update/{id}", (int id, Member member) =>
+app.MapPut("api/v1/member/update/{id}",
+([FromServices] LibraryDB db,
+[FromRoute] int id,
+[FromBody] Member member) =>
 {
-    using var db = new LibraryDB();
     var m = db.Members.Find(id);
     if (m == null)
     {
@@ -88,9 +95,10 @@ app.MapPut("api/v1/member/update/{id}", (int id, Member member) =>
     return "book updated";
 }
 );
-app.MapDelete("api/v1/member/remove/{id}", (int id) =>
+app.MapDelete("api/v1/member/remove/{id}",
+([FromServices] LibraryDB db,
+[FromRoute] int id) =>
 {
-    using var db = new LibraryDB();
     var member = db.Members.Find(id);
     if (member == null)
     {
