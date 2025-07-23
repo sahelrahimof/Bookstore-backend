@@ -1,7 +1,10 @@
+using System.Data.Common;
+using backend.DbContextes;
+using backend.Entities;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -14,24 +17,51 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapGet("api/v1/books/list", () =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    using var db = new LibraryDB();
+    return db.Books.ToList();
+});
+app.MapPost("api/v1/books/create", (Book book) =>
+{
+    using var db = new LibraryDB();
+    db.Books.Add(book);
+    db.SaveChanges();
+    return "book created!!!";
+});
+app.MapPut("api/v1/books/update/{id}", (int id,Book book) =>
+{
+    using var db = new LibraryDB();
+    var b = db.Books.Find(id);
+    if (b == null)
+    {
+        return "book dose not exist .";
+    }
+    b.Titel = book.Titel;
+    b.Price = book.Price;
+    b.Publisher = book.Publisher;
+    b.Writer = book.Writer;
+    db.SaveChanges();
+    return "book updated";
+}
+);
+app.MapDelete("api/v1/books/remove/{id}", (int id) =>
+{
+    using var db = new LibraryDB();
+    var book = db.Books.Find(id);
+    if (book == null)
+    {
+          return "book dose not exist .";
+    }
+    db.Books.Remove(book);
+    db.SaveChanges();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    return "book removed";
+}
+);
+
+
+
 
 app.Run();
 
